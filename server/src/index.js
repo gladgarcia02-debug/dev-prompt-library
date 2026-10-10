@@ -49,4 +49,8 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ error: "An unexpected server error occurred." });
 });
 
-app.listen(port, () => console.log(`Prompt Library API listening on http://localhost:${port}`));
+if (process.env.VERCEL !== "1") {
+  app.listen(port, () => console.log(`Prompt Library API listening on http://localhost:${port}`));
+}
+
+export default app;

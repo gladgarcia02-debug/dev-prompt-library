@@ -53,27 +53,32 @@ Google settings empty to keep password login available without Google sign-in.
 Google sign-in creates an account on first use and links to an existing account
 when Google reports the same verified email address.
 
-### 3. Install, initialize, and start the backend
+### 3. Install dependencies
 
 ```powershell
 npm install
-npm run db:init
-npm run db:seed
-npm run dev
 ```
 
-Run these commands in the same backend terminal, still in the `server` directory.
+Run the install command from the repository root.
+
+### 4. Initialize the database and start the backend
+
+With `server/.env` configured and the database available:
+
+```powershell
+npm run db:init
+npm run db:seed
+npm run dev:server
+```
 
 The API runs at `http://localhost:4000`. Register with an email address and a
 password of at least 12 characters. Existing prompts are assigned to the first
 account registered after upgrading; subsequent accounts have separate libraries.
 
-### 4. Start the frontend in a second terminal from the project root
+### 5. Start the frontend in a second terminal from the project root
 
 ```powershell
-cd client
-npm install
-npm run dev
+npm run dev:client
 ```
 
 Open the URL printed by Vite (normally `http://localhost:5173`).
@@ -102,3 +107,38 @@ Open the URL printed by Vite (normally `http://localhost:5173`).
   Before exposing it publicly, configure HTTPS and deployment-specific secrets
   management, and consider email verification and account recovery.
 - Do not store passwords, API keys, private credentials, or sensitive personal data in prompt templates.
+
+## Deploy to Vercel
+
+The repository is configured as a single Vercel project: the React/Vite client is
+built into `client/dist`, and `/api/*` requests are handled by the Express
+serverless function in `api/[...route].js`. Use the repository root as the
+Vercel project root. A hosted PostgreSQL database is required; Vercel's
+filesystem is not persistent and must not be used for application data.
+
+Add these server environment variables in the Vercel project settings for each
+environment you deploy:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Connection string for a hosted PostgreSQL database. Prefer the provider's pooled connection string and require TLS. |
+| `SESSION_SECRET` | A unique random secret of at least 32 characters. |
+| `CLIENT_ORIGIN` | The deployed site's origin, such as `https://your-project.vercel.app`, without a trailing slash. |
+| `GOOGLE_CLIENT_ID` | Optional; OAuth client ID. |
+| `GOOGLE_CLIENT_SECRET` | Optional; OAuth client secret. |
+| `GOOGLE_REDIRECT_URI` | Optional; exact callback URL, such as `https://your-project.vercel.app/api/auth/google/callback`. |
+
+Do not set `VITE_API_URL` for this same-origin deployment; production uses
+`/api` automatically. `VITE_API_URL` is only needed when the API is hosted on a
+different origin.
+
+After setting `DATABASE_URL` and `SESSION_SECRET` locally in `server/.env`, run
+`npm run db:init` and `npm run db:seed` from the repository root to initialize
+the hosted database. Keep `server/.env` out of Git. If enabling Google sign-in,
+add the production callback URL to the OAuth client's authorized redirect URIs
+and update the three Google variables above.
+
+In Vercel, import the GitHub repository and leave the Root Directory as `.`.
+The checked-in `vercel.json` provides the install command, build command, and
+output directory. Deploy after setting the environment variables; then check
+`https://your-project.vercel.app/api/health` for `{"status":"ok"}`.
