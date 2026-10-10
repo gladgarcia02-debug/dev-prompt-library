@@ -1,0 +1,168 @@
+.layout {
+  display:grid;
+  grid-template-columns:244px minmax(0,1fr);
+  max-width:1600px;
+  margin:0 auto;
+}
+
+.sidebar {
+  background:#fff;
+  border-right:1px solid #e9eaf1;
+  min-height:calc(100vh - 76px);
+  padding:29px 17px 18px;
+  position:relative;
+}
+
+.side-heading {
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.5px;
+  color:#a0a2b4;
+  padding:0 12px 13px;
+}
+
+.category-heading {
+  padding-top:29px;
+}
+
+.nav-item {
+  border:0;
+  background:transparent;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 12px;
+  border-radius:9px;
+  color:#73768b;
+  font-size:12px;
+  text-align:left;
+  margin:2px 0;
+}
+
+.nav-item:hover {
+  background:#f7f7fc;
+}
+
+.nav-item.selected {
+  background:#f0efff;
+  color:#5e56d5;
+  font-weight:700;
+}
+
+.nav-count {
+  margin-left:auto;
+  font-size:10px;
+  color:#a3a5b6;
+  background:#f2f3f8;
+  border-radius:6px;
+  padding:3px 7px;
+}
+
+.selected .nav-count {
+  color:#625bd4;
+  background:#e4e2ff;
+}
+
+.category-dot {
+  width:8px;
+  height:8px;
+  border-radius:3px;
+  background:#8b8ee8;
+  flex-shrink:0;
+}
+
+.dot-plan {
+  background:#8b8ee8;
+}
+
+.dot-analyze {
+  background:#68a8e8;
+}
+
+.dot-build {
+  background:#43bba0;
+}
+
+.dot-debug {
+  background:#e99b68;
+}
+
+.dot-review {
+  background:#b18ce5;
+}
+
+.dot-backend {
+  background:#6c9edb;
+}
+
+.dot-database {
+  background:#e2b34e;
+}
+
+.dot-testing {
+  background:#55b9c9;
+}
+
+.dot-security {
+  background:#df7d8a;
+}
+
+.dot-maintain {
+  background:#8aa2b6;
+}
+
+.dot-delivery {
+  background:#72b17b;
+}
+
+.dot-learn {
+  background:#d5a1cf;
+}
+
+.sidebar-note {
+  margin:42px 4px 0;
+  padding:16px 14px;
+  background:linear-gradient(145deg,#f4f2ff,#faf9ff);
+  border:1px solid #ebe8ff;
+  border-radius:12px;
+}
+
+.note-icon {
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  background:#e6e3ff;
+  color:#645bdb;
+  border-radius:9px;
+  margin-bottom:12px;
+}
+
+.sidebar-note strong {
+  font-size:12px;
+}
+
+.sidebar-note p {
+  font-size:11px;
+  line-height:1.6;
+  color:#83869a;
+  margin:7px 0 0;
+}
+
+.sidebar-footer {
+  position:absolute;
+  bottom:18px;
+  left:28px;
+  right:22px;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:#b1b3c2;
+}
+
+.sidebar-footer span {
+  float:right;
+  font-weight:500;
+  letter-spacing:0;
+}

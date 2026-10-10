@@ -1,0 +1,61 @@
+.editor-form {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.editor-form h2 {
+  font:800 23px Manrope,sans-serif;
+  margin:4px 0 -8px;
+  letter-spacing:-.7px;
+}
+
+.editor-form .detail-subtitle {
+  margin-bottom:2px;
+}
+
+.field-label {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-size:10px;
+  font-weight:700;
+  color:#62657b;
+}
+
+.field-label input,.field-label select,.field-label textarea {
+  width:100%;
+  border:1px solid #e5e6ef;
+  border-radius:8px;
+  padding:11px 12px;
+  background:#fff;
+  color:#303249;
+  outline-color:#8c84e8;
+  font-size:11px;
+  font-weight:400;
+}
+
+.field-label textarea {
+  line-height:1.7;
+  min-height:180px;
+}
+
+.favorite-check {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:11px;
+  color:#6c6f84;
+}
+
+.favorite-check input {
+  accent-color:#655cdb;
+}
+
+.form-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  padding-top:6px;
+  border-top:1px solid #f0f0f5;
+}
