@@ -128,7 +128,7 @@ environment you deploy:
 | `CLIENT_ORIGIN` | The deployed site's origin, such as `https://your-project.vercel.app`, without a trailing slash. |
 | `GOOGLE_CLIENT_ID` | Optional; OAuth client ID. |
 | `GOOGLE_CLIENT_SECRET` | Optional; OAuth client secret. |
-| `GOOGLE_REDIRECT_URI` | Optional; exact callback URL, such as `https://your-project.vercel.app/api/auth/google/callback`. |
+| `GOOGLE_REDIRECT_URI` | Optional; exact callback URL, such as `https://your-project.vercel.app/api/auth/google/callback`. Defaults to the deployed origin plus `/api/auth/google/callback`. |
 
 Do not set `VITE_API_URL` for this same-origin deployment; production uses
 `/api` automatically. `VITE_API_URL` is only needed when the API is hosted on a
@@ -146,3 +146,10 @@ at the repository root (`.`). The service roots are configured separately in
 variables; then check `https://your-project.vercel.app/api/health` for
 `{"status":"ok"}`. You can run the services together locally with `vercel dev`
 after installing and authenticating the Vercel CLI.
+
+For Google sign-in, add the production callback URL
+`https://your-project.vercel.app/api/auth/google/callback` to the OAuth
+client's authorized redirect URIs. Set `CLIENT_ORIGIN` to the site's canonical
+HTTPS origin in Vercel. On Vercel, the app derives missing URLs from
+`VERCEL_URL` and ignores localhost URL values, so OAuth redirects do not return
+to a developer's machine.

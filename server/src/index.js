@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { requireAuth } from "./auth/middleware.js";
+import { getClientOrigin } from "./auth/google.js";
 import { pool } from "./db/pool.js";
 import authRouter from "./routes/auth.js";
 import promptsRouter from "./routes/prompts.js";
@@ -21,7 +22,7 @@ if (!sessionSecret || sessionSecret.length < 32) {
 if (isProduction) app.set("trust proxy", 1);
 
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  origin: getClientOrigin(),
   credentials: true
 }));
 app.use(express.json({ limit: "100kb" }));

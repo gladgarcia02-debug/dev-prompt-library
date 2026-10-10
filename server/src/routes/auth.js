@@ -4,7 +4,9 @@ import {
 } from "node:crypto";
 import { rateLimit } from "express-rate-limit";
 import { hashPassword, validateCredentials, verifyPassword } from "../auth/credentials.js";
-import { validOAuthState, verifiedGoogleProfile } from "../auth/google.js";
+import {
+  getClientOrigin, getGoogleRedirectUri, validOAuthState, verifiedGoogleProfile
+} from "../auth/google.js";
 import { pool } from "../db/pool.js";
 
 const router = Router();
@@ -20,14 +22,17 @@ const authLimiter = rateLimit({
 router.use(["/register", "/login"], authLimiter);
 
 function googleConfig() {
-  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } = process.env;
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) return null;
-  return { clientId: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, redirectUri: GOOGLE_REDIRECT_URI };
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return null;
+  return {
+    clientId: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    redirectUri: getGoogleRedirectUri()
+  };
 }
 
 function frontendRedirect(result) {
-  const origin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-  return `${origin}/?auth_error=${encodeURIComponent(result)}`;
+  return `${getClientOrigin()}/?auth_error=${encodeURIComponent(result)}`;
 }
 
 async function googleJson(url, options) {
@@ -165,7 +170,7 @@ router.get("/google/callback", async (req, res, next) => {
     await regenerateSession(req);
     req.session.userId = user.id;
     await saveSession(req);
-    res.redirect(process.env.CLIENT_ORIGIN || "http://localhost:5173");
+    res.redirect(getClientOrigin());
   } catch (error) {
     if (error.code === "23505") {
       return res.redirect(frontendRedirect("google_account_conflict"));
