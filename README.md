@@ -110,11 +110,13 @@ Open the URL printed by Vite (normally `http://localhost:5173`).
 
 ## Deploy to Vercel
 
-The repository is configured as a single Vercel project: the React/Vite client is
-built into `client/dist`, and `/api/*` requests are handled by the Express
-serverless function in `api/[...route].js`. Use the repository root as the
-Vercel project root. A hosted PostgreSQL database is required; Vercel's
-filesystem is not persistent and must not be used for application data.
+The repository is configured as one Vercel project with two services. The
+`client` service builds the React/Vite frontend, and the `server` service runs
+the Express API. The top-level rewrites send `/api/*` to the server and all
+other paths to the client. The browser calls the API on the same origin, so no
+service binding or `VITE_API_URL` is needed. A hosted PostgreSQL database is
+required; Vercel's filesystem is not persistent and must not be used for
+application data.
 
 Add these server environment variables in the Vercel project settings for each
 environment you deploy:
@@ -138,7 +140,9 @@ the hosted database. Keep `server/.env` out of Git. If enabling Google sign-in,
 add the production callback URL to the OAuth client's authorized redirect URIs
 and update the three Google variables above.
 
-In Vercel, import the GitHub repository and leave the Root Directory as `.`.
-The checked-in `vercel.json` provides the install command, build command, and
-output directory. Deploy after setting the environment variables; then check
-`https://your-project.vercel.app/api/health` for `{"status":"ok"}`.
+In Vercel, import the GitHub repository and leave the project Root Directory
+at the repository root (`.`). The service roots are configured separately in
+`vercel.json` as `client` and `server`. Deploy after setting the environment
+variables; then check `https://your-project.vercel.app/api/health` for
+`{"status":"ok"}`. You can run the services together locally with `vercel dev`
+after installing and authenticating the Vercel CLI.
