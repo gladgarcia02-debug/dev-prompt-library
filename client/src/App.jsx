@@ -1,20 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Search, Plus, Copy, Pencil, Trash2, Code2, ChevronRight,
-  BookOpen, Star, X, Check, ArrowLeft, WandSparkles, FileText, LogOut
-} from "lucide-react";
+import { Check, Code2, Plus } from "lucide-react";
 import AuthScreen from "./AuthScreen.jsx";
 import { request } from "./api.js";
-
-const CATEGORIES = ["Plan", "Analyze", "Build", "Debug", "Review", "Backend", "Database", "Testing", "Security", "Maintain", "Delivery", "Learn", "Other"];
-const emptyForm = { title: "", category: "Plan", description: "", content: "", is_favorite: false };
-const oauthErrorMessages = {
-  google_not_configured: "Google sign-in is not configured. Add Google OAuth credentials to the server environment.",
-  google_cancelled: "Google sign-in was cancelled.",
-  google_unverified_email: "Google must verify your email address before you can sign in.",
-  google_account_conflict: "This Google account could not be linked. Try signing in with your existing account.",
-  google_failed: "Google sign-in could not be completed. Please try again."
-};
+import AppHeader from "./components/AppHeader.jsx";
+import LibrarySidebar from "./components/LibrarySidebar.jsx";
+import PromptDetail from "./components/PromptDetail.jsx";
+import PromptEditor from "./components/PromptEditor.jsx";
+import PromptLibraryPanel from "./components/PromptLibraryPanel.jsx";
+import PromptStats from "./components/PromptStats.jsx";
+import { emptyForm, oauthErrorMessages } from "./constants.js";
 
 function readOAuthError() {
   const params = new URLSearchParams(window.location.search);
@@ -195,40 +189,10 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark"><Code2 size={21}/></div>
-          <div><div className="brand-name">DevPrompt</div><div className="brand-sub">YOUR ENGINEERING PLAYBOOK</div></div>
-        </div>
-        <div className="top-actions">
-          <span className="saved-label"><span className="live-dot"/> {user?.email}</span>
-          <button className="secondary-btn logout-btn" onClick={logout} aria-label="Log out">
-            <LogOut size={15}/><span className="logout-label">Log out</span>
-          </button>
-          <button className="primary-btn" onClick={startCreate}><Plus size={17}/> New prompt</button>
-        </div>
-      </header>
+      <AppHeader user={user} onLogout={logout} onCreatePrompt={startCreate}/>
 
       <main className="layout">
-        <aside className="sidebar">
-          <div className="side-heading">LIBRARY</div>
-          <button className={`nav-item ${category === "All prompts" ? "selected" : ""}`} onClick={() => setCategory("All prompts")}>
-            <BookOpen size={17}/> All prompts <span className="nav-count">{prompts.length}</span>
-          </button>
-          <div className="side-heading category-heading">CATEGORIES</div>
-          {CATEGORIES.filter((c) => prompts.some((p) => p.category === c)).map((c) => (
-            <button key={c} className={`nav-item ${category === c ? "selected" : ""}`} onClick={() => setCategory(c)}>
-              <span className={`category-dot dot-${c.toLowerCase()}`}/>{c}
-              <span className="nav-count">{prompts.filter((p) => p.category === c).length}</span>
-            </button>
-          ))}
-          <div className="sidebar-note">
-            <div className="note-icon"><WandSparkles size={17}/></div>
-            <strong>Make every prompt count.</strong>
-            <p>Save your best engineering workflows and reuse them whenever you build.</p>
-          </div>
-          <div className="sidebar-footer">DEV PROMPT LIBRARY <span>v1.0</span></div>
-        </aside>
+        <LibrarySidebar category={category} onCategoryChange={setCategory} prompts={prompts}/>
 
         <section className="main-content">
           <div className="page-intro">
@@ -240,56 +204,44 @@ function App() {
             <div className="intro-icon"><Code2 size={29}/></div>
           </div>
 
-          <div className="stats-row">
-            <div className="stat-card"><span className="stat-icon purple"><FileText size={17}/></span><div><strong>{counts.total}</strong><span>Prompts found</span></div></div>
-            <div className="stat-card"><span className="stat-icon blue"><BookOpen size={17}/></span><div><strong>{counts.categories}</strong><span>Categories</span></div></div>
-            <div className="stat-card"><span className="stat-icon amber"><Star size={17}/></span><div><strong>{counts.favorites}</strong><span>Favorites</span></div></div>
-          </div>
+          <PromptStats counts={counts}/>
 
           <div className="workspace">
-            <section className="prompt-list-panel">
-              <div className="list-header"><div><h2>Prompt library</h2><p>Browse, edit, and reuse your templates.</p></div></div>
-              <label className="search-box"><Search size={17}/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search prompts..."/>{search && <button className="icon-btn clear-search" onClick={() => setSearch("")} aria-label="Clear search"><X size={14}/></button>}</label>
-              <div className="prompt-list">
-                {prompts.map((prompt, index) => (
-                  <button key={prompt.id} className={`prompt-list-item ${activeId === prompt.id ? "active" : ""}`} onClick={() => selectPrompt(prompt)}>
-                    <div className="prompt-number">{String(index + 1).padStart(2, "0")}</div>
-                    <div className="prompt-item-copy"><strong>{prompt.title}</strong><span>{prompt.description}</span><em>{prompt.category}</em></div>
-                    {prompt.is_favorite && <Star size={14} className="favorite-small" fill="currentColor"/>}
-                    <ChevronRight size={16} className="list-chevron"/>
-                  </button>
-                ))}
-                {prompts.length === 0 && <div className="empty-list"><FileText size={25}/><strong>No prompts found</strong><span>Try another search or create a new prompt.</span><button className="text-btn" onClick={startCreate}>Create prompt</button></div>}
-              </div>
-              <button className="add-prompt-link" onClick={startCreate}><Plus size={16}/> Add a new prompt</button>
-            </section>
+            <PromptLibraryPanel
+              search={search}
+              onSearchChange={setSearch}
+              prompts={prompts}
+              activeId={activeId}
+              onSelectPrompt={selectPrompt}
+              onCreatePrompt={startCreate}
+            />
 
             <section className="detail-panel">
               {view === "form" ? (
-                <form className="editor-form" onSubmit={savePrompt}>
-                  <div className="detail-topline"><span className="pill">{activeId ? "EDIT TEMPLATE" : "NEW TEMPLATE"}</span><button type="button" className="icon-btn" onClick={() => { setView("detail"); setError(""); }} aria-label="Close editor"><X size={17}/></button></div>
-                  <h2>{activeId ? "Edit prompt" : "Create a prompt"}</h2>
-                  <p className="detail-subtitle">Give your reusable prompt a clear name and useful instructions.</p>
-                  <label className="field-label">Prompt title<input required maxLength="120" value={form.title} onChange={(e) => updateForm("title", e.target.value)} placeholder="e.g. Review a pull request"/></label>
-                  <label className="field-label">Category<select value={form.category} onChange={(e) => updateForm("category", e.target.value)}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select></label>
-                  <label className="field-label">Short description<input maxLength="300" value={form.description} onChange={(e) => updateForm("description", e.target.value)} placeholder="What does this prompt help you do?"/></label>
-                  <label className="field-label">Prompt content<textarea required rows="12" value={form.content} onChange={(e) => updateForm("content", e.target.value)} placeholder="Write your reusable prompt here..."/></label>
-                  <label className="favorite-check"><input type="checkbox" checked={form.is_favorite} onChange={(e) => updateForm("is_favorite", e.target.checked)}/> Mark as favorite</label>
-                  {error && <div className="error-message">{error}</div>}
-                  <div className="form-actions"><button type="button" className="secondary-btn" onClick={() => setView("detail")}>Cancel</button><button className="primary-btn" disabled={busy}>{busy ? "Saving..." : <><Check size={16}/> Save prompt</>}</button></div>
-                </form>
+                <PromptEditor
+                  activeId={activeId}
+                  form={form}
+                  onUpdateForm={updateForm}
+                  onSave={savePrompt}
+                  busy={busy}
+                  error={error}
+                  onClose={() => { setView("detail"); setError(""); }}
+                  onCancel={() => setView("detail")}
+                />
               ) : displayPrompt ? (
-                <>
-                  <div className="detail-topline"><span className="pill">{displayPrompt.category.toUpperCase()}</span><div className="detail-actions"><button className="icon-btn" onClick={() => startEdit(displayPrompt)} title="Edit prompt"><Pencil size={16}/></button><button className="icon-btn danger-hover" onClick={() => deletePrompt(displayPrompt)} title="Delete prompt"><Trash2 size={16}/></button></div></div>
-                  <h2 className="detail-title">{displayPrompt.title}</h2>
-                  <p className="detail-subtitle">{displayPrompt.description}</p>
-                  <div className="content-label"><span>YOUR PROMPT</span><span className="content-label-right"><span className="live-dot"/> REUSABLE TEMPLATE</span></div>
-                  <pre className="prompt-content">{displayPrompt.content}</pre>
-                  {customOpen && <div className="customizer"><div className="customizer-head"><div><WandSparkles size={16}/><strong>Customize this prompt</strong></div><button className="icon-btn" onClick={() => setCustomOpen(false)} aria-label="Close customizer"><X size={16}/></button></div><p>Replace placeholders such as [PROJECT IDEA] with your own details before copying.</p><textarea value={customText} onChange={(e) => setCustomText(e.target.value)} rows={8}/><button className="primary-btn" onClick={() => copyText(customText)}><Copy size={16}/> Copy customized prompt</button></div>}
-                  {error && <div className="error-message">{error}</div>}
-                  {notice && <div className="success-message"><Check size={15}/>{notice}</div>}
-                  <div className="detail-footer"><div className="updated-label">UPDATED {new Date(displayPrompt.updated_at).toLocaleDateString()}</div><div className="detail-footer-actions"><button className="secondary-btn" onClick={() => openCustomizer(displayPrompt)}><WandSparkles size={16}/> Customize</button><button className="primary-btn" onClick={() => copyText(displayPrompt.content)}><Copy size={16}/> Copy prompt</button></div></div>
-                </>
+                <PromptDetail
+                  prompt={displayPrompt}
+                  customOpen={customOpen}
+                  customText={customText}
+                  onEdit={startEdit}
+                  onDelete={deletePrompt}
+                  onCustomize={openCustomizer}
+                  onCustomTextChange={setCustomText}
+                  onCloseCustomizer={() => setCustomOpen(false)}
+                  onCopy={copyText}
+                  error={error}
+                  notice={notice}
+                />
               ) : (
                 <div className="welcome-state"><div className="welcome-icon"><Code2 size={30}/></div><h2>Your next great prompt starts here.</h2><p>Select a prompt from the library or create a new one to get started.</p><button className="primary-btn" onClick={startCreate}><Plus size={17}/> Create prompt</button></div>
               )}
